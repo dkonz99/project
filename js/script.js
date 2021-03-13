@@ -24,3 +24,23 @@ const movieDB = {
     ]
 };
 
+let adv = document.querySelector('.promo__adv');
+let genre = document.querySelector('.promo__genre');
+let bg = document.querySelector('.promo__bg');
+let interactiveList = document.querySelector('.promo__interactive-list');
+let interactiveItem = document.querySelectorAll('.promo__interactive-item');
+let Delete = document.querySelectorAll('.delete');
+
+adv.remove();
+
+genre.textContent = 'ДРАМА';
+
+bg.style.background = 'url(../img/bg.jpg) center center/cover no-repeat';
+
+movieDB.movies.sort();
+for (let i = 0; i < interactiveItem.length; i++) {
+    Delete[i].remove();
+    interactiveItem[i].textContent = i+1 + '.' + ' ' + movieDB.movies[i];
+}
+
+
