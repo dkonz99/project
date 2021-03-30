@@ -6,7 +6,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     function hideTabContent() {
         tabsContent.forEach(item => {
-            item.style.display = "none";
+            item.classList.add('hide');
+            item.classList.remove('show');
         });
 
         tabs.forEach(item => {
@@ -14,7 +15,8 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     function showTabContent(i = 0) {
-        tabsContent[i].style.display = 'block';
+        tabsContent[i].classList.add('show');
+        tabsContent[i].classList.remove('hide');
         tabs[i].classList.add('tabheader__item_active');
     }
 
@@ -90,25 +92,23 @@ window.addEventListener('DOMContentLoaded', () => {
     //Modal
 
     let modalOpen = document.querySelectorAll('[data-modal]');
-    let modalClose = document.querySelectorAll('[data-close]');
     let modal = document.querySelector('.modal');
 
     function modalOpenFunction() {
-        modal.style.display = 'block';
+        modal.classList.add('show');
+        modal.classList.remove('hide');
         document.body.style.overflow = 'hidden';
         clearInterval(modalTimerId);
     }
 
     function modalCloseFunction() {
-        modal.style.display = 'none';
+        modal.classList.add('hide');
+        modal.classList.remove('show');
         document.body.style.overflow = '';
     }
     
     modalOpen.forEach((item,i) => {
             modalOpen[i].addEventListener('click', modalOpenFunction);
-    });
-    modalClose.forEach((item,i) => {
-            modalClose[i].addEventListener('click', modalCloseFunction);
     });
     document.addEventListener('keydown', (event) => {
         if (event.keyCode == '27' && modal.style.display == 'block') {
@@ -116,12 +116,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });    
     modal.addEventListener('click', (event) => {
-        if (event.target == modal) {
+        if (event.target == modal || event.target.getAttribute('data-close') == '') {
             modalCloseFunction();
         }
     });
 
-    let modalTimerId = setTimeout(modalOpenFunction, 5000);
+    let modalTimerId = setTimeout(modalOpenFunction, 50000);
 
     function showModalByScroll() {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
@@ -205,7 +205,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let forms = document.querySelectorAll('form');
 
     let message = {
-        loading: 'Загрузка',
+        loading: 'img/form/spinner.svg',
         success: 'Спасибо! Скоро мы с вами свяжемся',
         failure: 'Что-то пошло не так...'
     };
@@ -218,9 +218,13 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            let statusMessage = document.createElement('div');
-            statusMessage.textContent = message.loading;
-            form.append(statusMessage);
+            let statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display:block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement('afterend', statusMessage);
 
             let request = new XMLHttpRequest();
             request.open('POST', 'server.php');
@@ -240,15 +244,38 @@ window.addEventListener('DOMContentLoaded', () => {
             request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
-                    statusMessage.textContent = message.success;
+                    showThanksModal(message.success);
                     form.reset();
-                    setTimeout(() => {
-                        statusMessage.remove();
-                    }, 2000);
+                    statusMessage.remove();
                 } else {
-                    statusMessage.textContent = message.failure;
+                    showThanksModal(message.failure);
                 }
             });
         });
+    }
+
+    function showThanksModal(message) {
+        let prevModalDialog = document.querySelector('.modal__dialog');
+
+        prevModalDialog.classList.add('hide');
+        prevModalDialog.classList.remove('show');
+        modalOpenFunction();
+
+        let thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+            <div class="modal__content">
+                    <div data-close class="modal__close">&times;</div>
+                    <div class="modal__title">${message}</div>
+            </div>
+        `;
+
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+                thanksModal.remove();
+                prevModalDialog.classList.add('show');
+                prevModalDialog.classList.remove('hide');
+                modalCloseFunction();
+        }, 4000);
     }
 });
