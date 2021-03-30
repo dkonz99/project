@@ -138,12 +138,13 @@ window.addEventListener('DOMContentLoaded', () => {
     let menuFieldContainer = menuField.querySelector('.container');
 
     class NewMenuItem {
-        constructor(src, alt, subtitle, descr, total) {
+        constructor(src, alt, subtitle, descr, total, ...classes) {
             this.src = src;
             this.alt = alt;
             this.subtitle = subtitle;
             this.descr = descr;
             this.total = total;
+            this.classes = classes;
         }
 
         createItem() {
@@ -199,4 +200,55 @@ window.addEventListener('DOMContentLoaded', () => {
     new NewMenuItem('img/tabs/elite.jpg', 'elite', 'Меню “Премиум”', 'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!', 550).createItem();
     new NewMenuItem('img/tabs/post.jpg', 'post', 'Меню "Постное"', 'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.', 430).createItem();
     
+    //Forms
+
+    let forms = document.querySelectorAll('form');
+
+    let message = {
+        loading: 'Загрузка',
+        success: 'Спасибо! Скоро мы с вами свяжемся',
+        failure: 'Что-то пошло не так...'
+    };
+
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let statusMessage = document.createElement('div');
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            let request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            request.setRequestHeader('Content-type', 'application/json');
+            let formData = new FormData(form);
+
+            let object = {};
+            formData.forEach(function(value, key) {
+                object[key] = value;
+            });
+
+            let json = JSON.stringify(object);
+
+            request.send(json);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    form.reset();
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    }
 });
