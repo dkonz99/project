@@ -280,6 +280,7 @@ window.addEventListener('DOMContentLoaded', function() {
         const prevModalDialog = document.querySelector('.modal__dialog');
 
         prevModalDialog.classList.add('hide');
+        prevModalDialog.classList.remove('show');
         openModal();
 
         const thanksModal = document.createElement('div');
